@@ -22,7 +22,7 @@ type Config struct {
 }
 
 var config = Config{
-	ImageDir: "./",
+	ImageDir: "./images",
 	Password: "",
 	Port:     "8008",
 	Title:    "在线图集",
