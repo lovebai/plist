@@ -53,9 +53,6 @@ func main() {
 			*conf = val
 		}
 	}
-
-	log.Printf("配置信息: %s", config)
-
 	// 路由设置
 	http.HandleFunc("/login", loginHandler)
 	if config.Dynamic == "true" {
@@ -350,10 +347,10 @@ func AuthMiddleware(next http.Handler) http.Handler {
 	if config.Password != "" {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("auth")
-			log.Printf("请求路径: %s, Cookie状态: %+v, 错误信息: %v", r.URL.Path, cookie, err)
+			// log.Printf("请求路径: %s, Cookie状态: %+v, 错误信息: %v", r.URL.Path, cookie, err)
 
 			if err != nil || !verifyCookie(cookie) {
-				log.Printf("验证失败，跳转登录页面")
+				// log.Printf("验证失败，跳转登录页面")
 				http.Redirect(w, r, "/login", http.StatusFound)
 				return
 			}
