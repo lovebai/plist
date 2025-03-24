@@ -30,12 +30,59 @@ var config = Config{
 	Dynamic:  "false",
 }
 
+var categoryCache []Category
+
+type Category struct {
+	Name        string
+	EncodedName string
+	CoverImage  string
+}
+
 var imageExtensions = map[string]bool{
 	".jpg":  true,
 	".jpeg": true,
 	".png":  true,
 	".gif":  true,
 	".webp": true,
+}
+
+func scanCategories(imageDir string) []Category {
+	categories, err := os.ReadDir(imageDir)
+	if err != nil {
+		log.Fatalf("无法读取目录 %s: %v", imageDir, err)
+	}
+
+	var categoryList []Category
+	for _, category := range categories {
+		if category.IsDir() {
+			dirPath := filepath.Join(imageDir, category.Name())
+			entries, err := os.ReadDir(dirPath)
+			if err != nil {
+				log.Printf("无法读取目录 %s: %v", dirPath, err)
+				continue
+			}
+
+			var coverImage string
+			for _, entry := range entries {
+				if entry.IsDir() {
+					continue
+				}
+				ext := strings.ToLower(filepath.Ext(entry.Name()))
+				if imageExtensions[ext] {
+					coverImage = entry.Name()
+					break
+				}
+			}
+			if coverImage != "" {
+				categoryList = append(categoryList, Category{
+					Name:        category.Name(),
+					EncodedName: url.PathEscape(category.Name()),
+					CoverImage:  coverImage,
+				})
+			}
+		}
+	}
+	return categoryList
 }
 
 func main() {
@@ -53,6 +100,9 @@ func main() {
 			*conf = val
 		}
 	}
+
+	categoryCache = scanCategories(config.ImageDir)
+
 	// 路由设置
 	http.HandleFunc("/login", loginHandler)
 	if config.Dynamic == "true" {
@@ -62,7 +112,6 @@ func main() {
 	http.Handle("/", AuthMiddleware(http.HandlerFunc(indexHandler)))
 	http.Handle("/category/", AuthMiddleware(http.HandlerFunc(categoryHandler)))
 	http.Handle("/images/", AuthMiddleware(http.StripPrefix("/images/", http.FileServer(http.Dir(config.ImageDir)))))
-	http.Handle("/js/", AuthMiddleware(http.StripPrefix("/js/", http.FileServer(http.Dir("./js")))))
 	log.Println("服务器启动在 :", config.Port)
 	log.Fatal(http.ListenAndServe(":"+config.Port, nil))
 }
@@ -72,59 +121,14 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		tmpl := template.Must(template.New("index").Parse(indexDynamicTemplate))
 		tmpl.Execute(w, config)
 	} else {
-		categories, err := os.ReadDir(config.ImageDir)
-		if err != nil {
-			http.Error(w, "无法读取目录", http.StatusInternalServerError)
-			return
-		}
-
-		type Category struct {
-			Name        string
-			EncodedName string
-			CoverImage  string
-		}
-
 		type Tmp struct {
 			Category []Category
 			Config   Config
 		}
-
-		var categoryList []Category
-		for _, category := range categories {
-			if category.IsDir() {
-				dirPath := filepath.Join(config.ImageDir, category.Name())
-				entries, err := os.ReadDir(dirPath)
-				if err != nil {
-					log.Printf("无法读取目录 %s: %v", dirPath, err)
-					continue
-				}
-
-				var coverImage string
-				// 遍历目录项查找第一个有效图片
-				for _, entry := range entries {
-					if entry.IsDir() {
-						continue
-					}
-					ext := strings.ToLower(filepath.Ext(entry.Name()))
-					if imageExtensions[ext] {
-						coverImage = entry.Name()
-						break // 找到第一个有效图片即停止
-					}
-				}
-				if coverImage != "" {
-					categoryList = append(categoryList, Category{
-						Name:        category.Name(),
-						EncodedName: url.PathEscape(category.Name()),
-						CoverImage:  coverImage,
-					})
-				}
-			}
-		}
 		var tmp = Tmp{
-			Category: categoryList,
+			Category: categoryCache, // 使用缓存数据
 			Config:   config,
 		}
-
 		tmpl := template.Must(template.New("index").Parse(indexTemplate))
 		tmpl.Execute(w, tmp)
 	}
@@ -196,58 +200,15 @@ func indexJson(w http.ResponseWriter, r *http.Request) {
 	limitStr := r.URL.Query().Get("limit")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
-		page = 1 // 默认第一页
+		page = 1
 	}
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil || limit < 1 {
-		limit = 20 // 默认每页20个分类
+		limit = 20
 	}
 
-	// 读取分类目录
-	categories, err := os.ReadDir(config.ImageDir)
-	if err != nil {
-		http.Error(w, "无法读取目录", http.StatusInternalServerError)
-		return
-	}
-	type Category struct {
-		Name        string
-		EncodedName string
-		CoverImage  string
-	}
-
-	var categoryList []Category
-	for _, category := range categories {
-		if category.IsDir() {
-			dirPath := filepath.Join(config.ImageDir, category.Name())
-			entries, err := os.ReadDir(dirPath)
-			if err != nil {
-				log.Printf("无法读取目录 %s: %v", dirPath, err)
-				continue
-			}
-
-			var coverImage string
-			for _, entry := range entries {
-				if entry.IsDir() {
-					continue
-				}
-				ext := strings.ToLower(filepath.Ext(entry.Name()))
-				if imageExtensions[ext] {
-					coverImage = entry.Name()
-					break
-				}
-			}
-			if coverImage != "" {
-				categoryList = append(categoryList, Category{
-					Name:        category.Name(),
-					EncodedName: url.PathEscape(category.Name()),
-					CoverImage:  coverImage,
-				})
-			}
-		}
-	}
-
-	// 计算分页信息
-	totalCategories := len(categoryList)
+	// 使用缓存的分类信息
+	totalCategories := len(categoryCache)
 	totalPages := (totalCategories + limit - 1) / limit
 	start := (page - 1) * limit
 	end := start + limit
@@ -257,9 +218,8 @@ func indexJson(w http.ResponseWriter, r *http.Request) {
 	if end > totalCategories {
 		end = totalCategories
 	}
-	currentCategories := categoryList[start:end]
+	currentCategories := categoryCache[start:end]
 
-	// 返回 JSON 数据
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"categories": currentCategories,
