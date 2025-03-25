@@ -570,7 +570,7 @@ const categoryDynamicTemplate = `<!DOCTYPE html>
                                 '<div class="image-card">' +
                                     '<a href="/images/' + category + '/' + image.Name + '" data-fancybox="' + category + '">' +
                                         '<img data-src="/images/' + category + '/' + image.Name + '" alt="' + image.Name +
-										'src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="' +
+										'" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="' +
 										 '" class="img-fluid lazy" ' + (image.Type === 'gif' ? 'data-type="image/gif"' : '') + '>' +
                                     '</a>' +
                                 '</div>' +
