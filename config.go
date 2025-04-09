@@ -1,34 +1,24 @@
 package main
 
-import "os"
+import (
+	"os"
+)
 
 type Config struct {
-	ImageDir            string
-	Secure              string
-	Password            string
-	Port                string
-	Title               string
-	Icon                string
-	Adderss             string
-	Dynamic             string
-	Linuxdo             string
-	LinuxdoClientId     string
-	LinuxdoClientSecret string
+	ImageDir     string
+	Secure       string
+	Password     string
+	Port         string
+	Title        string
+	Icon         string
+	Adderss      string
+	Dynamic      string
+	Linuxdo      string
+	ClientId     string
+	ClientSecret string
 }
 
-var config = Config{
-	ImageDir:            "./images",
-	Password:            "",
-	Port:                "8009",
-	Title:               "在线图集",
-	Icon:                "https://i.obai.cc/favicon.ico",
-	Dynamic:             "false",
-	Adderss:             "http://localhost:8009",
-	Secure:              "false",
-	Linuxdo:             "false",
-	LinuxdoClientId:     "",
-	LinuxdoClientSecret: "",
-}
+var config = Config{}
 
 var categoryCache []Category
 
@@ -46,24 +36,31 @@ var imageExtensions = map[string]bool{
 	".webp": true,
 }
 
-func initConfig() {
-	envVars := map[string]*string{
-		"SITE_DIR":                   &config.ImageDir,
-		"SITE_SECURE":                &config.Secure,
-		"SITE_PASSWORD":              &config.Password,
-		"SITE_PORT":                  &config.Port,
-		"SITE_TITLE":                 &config.Title,
-		"SITE_ICON":                  &config.Icon,
-		"SITE_DYNAMIC":               &config.Dynamic,
-		"SITE_LINUXDO":               &config.Linuxdo,
-		"SITE_URL":                   &config.Adderss,
-		"SITE_LINUXDO_CLIENT_ID":     &config.LinuxdoClientId,
-		"SITE_LINUXDO_CLIENT_SECRET": &config.LinuxdoClientSecret,
+func initEnv() {
+	envDefaults := map[string]struct {
+		target     *string
+		envKey     string
+		defaultVal string
+	}{
+		"ImageDir":     {&config.ImageDir, "SITE_DIR", "./images"},
+		"Port":         {&config.Port, "SITE_PORT", "8009"},
+		"Title":        {&config.Title, "SITE_TITLE", "在线图集"},
+		"Icon":         {&config.Icon, "SITE_ICON", "https://i.obai.cc/favicon.ico"},
+		"Dynamic":      {&config.Dynamic, "SITE_DYNAMIC", "false"},
+		"Linuxdo":      {&config.Linuxdo, "SITE_LINUXDO", "false"},
+		"Address":      {&config.Adderss, "SITE_Address", "http://localhost:8009"},
+		"ClientId":     {&config.ClientId, "SITE_CLIENT_ID", ""},
+		"ClientSecret": {&config.ClientSecret, "SITE_CLIENT_SECRET", ""},
+		"Secure":       {&config.Secure, "SITE_SECURE", "false"},
+		"Password":     {&config.Password, "SITE_PASSWORD", ""},
 	}
 
-	for env, conf := range envVars {
-		if val := os.Getenv(env); val != "" {
-			*conf = val
+	for _, cfg := range envDefaults {
+		if val := os.Getenv(cfg.envKey); val != "" {
+			*cfg.target = val
+		} else {
+			*cfg.target = cfg.defaultVal
 		}
 	}
+
 }
