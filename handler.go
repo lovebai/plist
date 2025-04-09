@@ -13,6 +13,11 @@ import (
 	"time"
 )
 
+type UserInfo struct {
+	Username  string
+	AvatarURL string
+}
+
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
@@ -23,17 +28,56 @@ func loggingMiddleware(next http.Handler) http.Handler {
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "session-name")
+	var username, avatar string
+	if config.Linuxdo != "false" {
+		var ok bool
+		username, ok = session.Values["username"].(string)
+		if !ok {
+			if config.Password != "" {
+				username = ""
+			} else {
+				http.Redirect(w, r, "/login", http.StatusFound)
+				return
+			}
+		}
+		avatar, ok = session.Values["avatar"].(string)
+		if !ok {
+			if config.Password != "" {
+				avatar = ""
+			} else {
+				http.Redirect(w, r, "/login", http.StatusFound)
+				return
+			}
+		}
+	}
+
+	userInfo := UserInfo{
+		Username:  username,
+		AvatarURL: avatar,
+	}
+
 	if config.Dynamic == "true" {
+		type Tmp struct {
+			Config   Config
+			UserInfo UserInfo
+		}
+		var tmp = Tmp{
+			Config:   config,
+			UserInfo: userInfo,
+		}
 		tmpl := template.Must(template.New("index").Parse(indexDynamicTemplate))
-		tmpl.Execute(w, config)
+		tmpl.Execute(w, tmp)
 	} else {
 		type Tmp struct {
 			Category []Category
 			Config   Config
+			UserInfo UserInfo
 		}
 		var tmp = Tmp{
 			Category: categoryCache, // 使用缓存数据
 			Config:   config,
+			UserInfo: userInfo,
 		}
 		tmpl := template.Must(template.New("index").Parse(indexTemplate))
 		tmpl.Execute(w, tmp)
