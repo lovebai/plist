@@ -51,9 +51,6 @@ func scanCategories(imageDir string) []Category {
 
 func main() {
 	initEnv()
-
-	fmt.Printf("State: %s,%s,%s\n", config.Adderss, config.ClientId, config.ClientSecret)
-
 	categoryCache = scanCategories(config.ImageDir)
 
 	// 路由设置

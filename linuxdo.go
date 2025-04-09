@@ -52,8 +52,7 @@ func initiateAuthHandler(w http.ResponseWriter, r *http.Request) {
 		config.Adderss+"/oauth2/callback",
 		state,
 	)
-	fmt.Printf("authURL: %v\n", authURL)
-	// http.Redirect(w, r, authURL, http.StatusFound)
+	http.Redirect(w, r, authURL, http.StatusFound)
 }
 
 // 处理回调
