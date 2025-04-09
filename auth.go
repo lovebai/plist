@@ -9,7 +9,7 @@ import (
 
 // 认证中间件
 func AuthMiddleware(next http.Handler) http.Handler {
-	if config.Secure != "false" {
+	if config.Secure != "false" || config.Linuxdo != "false" {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("auth")
 			// log.Printf("请求路径: %s, Cookie状态: %+v, 错误信息: %v", r.URL.Path, cookie, err)
