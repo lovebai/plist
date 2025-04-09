@@ -18,13 +18,15 @@ type Config struct {
 	Port     string
 	Title    string
 	Icon     string
+	Url      string
 	Dynamic  string
+	Linuxdo  string
 }
 
 var config = Config{
 	ImageDir: "./images",
 	Password: "",
-	Port:     "8008",
+	Port:     "8009",
 	Title:    "在线图集",
 	Icon:     "https://i.obai.cc/favicon.ico",
 	Dynamic:  "false",
@@ -93,6 +95,8 @@ func main() {
 		"SITE_TITLE":    &config.Title,
 		"SITE_ICON":     &config.Icon,
 		"SITE_DYNAMIC":  &config.Dynamic,
+		"SITE_LINUXDO":  &config.Linuxdo,
+		"SITE_URL":      &config.Url,
 	}
 
 	for env, conf := range envVars {
@@ -105,6 +109,8 @@ func main() {
 
 	// 路由设置
 	http.HandleFunc("/login", loginHandler)
+	http.HandleFunc("/oauth2/linxdo", initiateAuthHandler)
+	http.HandleFunc("/oauth2/callback", callbackHandler)
 	if config.Dynamic == "true" {
 		http.Handle("/api/index/", AuthMiddleware(http.HandlerFunc(indexJson)))
 		http.Handle("/api/category/", AuthMiddleware(http.HandlerFunc(categoryJson)))
@@ -304,7 +310,7 @@ func categoryJson(w http.ResponseWriter, r *http.Request) {
 
 // 认证中间件
 func AuthMiddleware(next http.Handler) http.Handler {
-	if config.Password != "" {
+	if config.Password != "" || config.Linuxdo != "" {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("auth")
 			// log.Printf("请求路径: %s, Cookie状态: %+v, 错误信息: %v", r.URL.Path, cookie, err)
@@ -322,7 +328,8 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 // 验证cookie有效性
 func verifyCookie(cookie *http.Cookie) bool {
-	return cookie != nil && cookie.Value == "authenticated"
+	return cookie != nil && strings.Contains(cookie.Value, "authenticated")
+	// return cookie != nil && cookie.Value == "authenticated"
 }
 
 // 登录处理器
