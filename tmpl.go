@@ -6,11 +6,11 @@ const indexDynamicTemplate = `<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{{.Title}}，图片分类网站，展示各类图片集合。">
+    <meta name="description" content="{{.Config.Title}}，图片分类网站，展示各类图片集合。">
     <meta name="keywords" content="图片, 分类, 相册">
-    <title>{{.Title}}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="shortcut icon" type="image/x-icon" href="{{.Icon}}" />
+    <title>{{.Config.Title}}</title>
+    <link rel="stylesheet" href="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/5.1.3/css/bootstrap.min.css">
+    <link rel="shortcut icon" type="image/x-icon" href="{{.Config.Icon}}" />
     <style>
         .category-card { text-align: center; margin-bottom: 20px; }
         .category-card img { width: 100%; height: auto; border-radius: 8px; }
@@ -30,13 +30,32 @@ const indexDynamicTemplate = `<!DOCTYPE html>
 </head>
 <body>
     <div class="container">
-        <h1 class="my-4 text-center">{{.Title}}</h1>
+        <h1 class="my-4 text-center">{{.Config.Title}}</h1>
         <div class="row" id="category-container">
         </div>
         <div id="loading">加载中...</div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    {{if ne .Config.Linuxdo "false"}}
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-body" id="modal-body">
+        <div class="text-center">
+        <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" id="avatar" alt="Logo" style="width: 100px; height: 100px; border-radius: 50%;"><br>
+        </div>
+            <p class="text-center">欢迎来自Linux.do的佬友：<span id="username" style="color: #FF9800;">XXX</span></p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+        </div>
+    </div>
+    </div>
+    {{end}}
+
+    <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.6.0/jquery.js"></script>
+    <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
     <script>
 		let page = 1;
         const limit = 20;
@@ -109,6 +128,17 @@ const indexDynamicTemplate = `<!DOCTYPE html>
                 }
             });
         }
+        
+          function checkCookie(name) {
+            const cookieArr = document.cookie.split(";");
+            for (let i = 0; i < cookieArr.length; i++) {
+            const cookiePair = cookieArr[i].trim(); 
+            if (cookiePair.startsWith(name + "=")) {
+                return true; 
+            }
+            }
+            return false; 
+        }
 
         $(document).ready(function() {
             loadCategories(); // 初始加载第一页
@@ -118,7 +148,24 @@ const indexDynamicTemplate = `<!DOCTYPE html>
                     loadCategories();
                 }
             });
+            
+            {{if ne .Config.Linuxdo "false"}}
+            if (!checkCookie("modalClosed")) {
+                $('#username').text("{{.UserInfo.Username}}");
+                $('#avatar').attr("src", "{{.UserInfo.AvatarURL}}");
+                {{if ne .UserInfo.Username ""}}$('#exampleModal').modal('show');{{end}}
+            }
+            {{end}}
+
         });
+
+        {{if ne .Config.Linuxdo "false"}}
+        $('#exampleModal').on('hidden.bs.modal', function () {
+            if (!checkCookie("modalClosed")) {
+                document.cookie = "modalClosed=true; path=/; max-age=" + 60 * 60 * 24; // 1天有效期
+            }
+        });
+        {{end}}
 	</script>
 </body>
 </html>`
@@ -132,8 +179,8 @@ const categoryDynamicTemplate = `<!DOCTYPE html>
     <meta name="description" content="{{.Category}} 的图片集合， {{.Config.Title}}">
     <meta name="keywords" content="{{.Category}}, 图片, 相册">
     <title>{{.Category}} - {{.Config.Title}} - 图片合集</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/5.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/fancybox/3.5.7/jquery.fancybox.min.css">
     <link rel="shortcut icon" type="image/x-icon" href="{{.Config.Icon}}" />
     <style>
         .image-card { margin-bottom: 20px; }
@@ -167,9 +214,9 @@ const categoryDynamicTemplate = `<!DOCTYPE html>
         <button id="top-btn" onclick="scrollToTop()">🔝</button>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.6.0/jquery.js"></script>
+    <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+    <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
 	<script>
 	    let page = 1;
         const limit = 20;
@@ -269,7 +316,7 @@ const indexTemplate = `<!DOCTYPE html>
     <meta name="description" content="{{.Config.Title}}，图片分类网站，展示各类图片集合。">
     <meta name="keywords" content="图片, 分类, 相册">
     <title>{{.Config.Title}}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/5.1.3/css/bootstrap.min.css">
 	<link rel="shortcut icon" type="image/x-icon" href="{{.Config.Icon}}" />
 	<style>
         .category-card { text-align: center; margin-bottom: 20px; }
@@ -302,7 +349,25 @@ const indexTemplate = `<!DOCTYPE html>
 			{{end}}
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        {{if ne .Config.Linuxdo "false"}}
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-body" id="modal-body">
+        <div class="text-center">
+        <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" id="avatar" alt="Logo" style="width: 100px; height: 100px; border-radius: 50%;"><br>
+        </div>
+            <p class="text-center">欢迎来自Linux.do的佬友：<span id="username" style="color: #FF9800;">XXX</span></p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+        </div>
+    </div>
+    </div>
+    {{end}}
+    <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.6.0/jquery.js"></script>
+    <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
 	<script>
 	(function() {
         'use strict';
@@ -376,6 +441,35 @@ const indexTemplate = `<!DOCTYPE html>
             if (observer) observer.disconnect();
         });
     })();
+
+    function checkCookie(name) {
+            const cookieArr = document.cookie.split(";");
+            for (let i = 0; i < cookieArr.length; i++) {
+            const cookiePair = cookieArr[i].trim(); 
+            if (cookiePair.startsWith(name + "=")) {
+                return true; 
+            }
+            }
+            return false; 
+        }
+        {{if ne .Config.Linuxdo "false"}}
+        $('#exampleModal').on('hidden.bs.modal', function () {
+            if (!checkCookie("modalClosed")) {
+                document.cookie = "modalClosed=true; path=/; max-age=" + 60 * 60 * 24; // 1天有效期
+            }
+        });
+        {{end}}
+
+        $(document).ready(function() {
+                    {{if ne .Config.Linuxdo "false"}}
+            if (!checkCookie("modalClosed")) {
+                $('#username').text("{{.UserInfo.Username}}");
+                $('#avatar').attr("src", "{{.UserInfo.AvatarURL}}");
+                {{if ne .UserInfo.Username ""}}$('#exampleModal').modal('show');{{end}}
+            }
+            {{end}}
+        });
+
 	</script>
 </body>
 </html>`
@@ -389,8 +483,8 @@ const categoryTemplate = `<!DOCTYPE html>
     <meta name="description" content="{{.Category}} 的图片集合， {{.Config.Title}}">
     <meta name="keywords" content="{{.Category}}, 图片, 相册">
     <title>{{.Category}} - {{.Config.Title}} - 图片合集</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css">
+    <link rel="stylesheet" href="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/5.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/fancybox/3.5.7/jquery.fancybox.min.css">
 	<link rel="shortcut icon" type="image/x-icon" href="{{.Config.Icon}}" />
 	<style>
         .image-card { margin-bottom: 20px; }
@@ -429,9 +523,9 @@ const categoryTemplate = `<!DOCTYPE html>
     <button id="top-btn" onclick="scrollToTop()">🔝</button>
 	</div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.6.0/jquery.js"></script>
+    <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+    <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
     <script>
 	(function() {
         'use strict';
@@ -533,7 +627,7 @@ const loginTemplate = `<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登录</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/bootstrap/5.1.3/css/bootstrap.min.css">
 </head>
 <body class="bg-light">
     <div class="container mt-5">
