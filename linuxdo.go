@@ -18,10 +18,10 @@ const (
 )
 
 var (
-	ClientID     = "zbqn6RD1VL5JbFWuZ1NAuZLIIriE6mMc"
-	ClientSecret = "juKKbdazKQrZUB7gJyYKhhcbtIV6G7uo"
-	RedirectURI  = "http://localhost:8009/oauth2/callback"
-	store        = sessions.NewCookieStore([]byte("your-secret-key"))
+	ClientID     = config.LinuxdoClientId
+	ClientSecret = config.LinuxdoClientSecret
+	RedirectURI  = config.Adderss + "/oauth2/callback"
+	store        = sessions.NewCookieStore([]byte("secret-key"))
 )
 
 type User struct {
@@ -121,9 +121,13 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	session.Values["username"] = user.Username
+	session.Values["avatar"] = user.AvatarURL
+	session.Save(r, w)
+
 	http.SetCookie(w, &http.Cookie{
 		Name:     "auth",
-		Value:    "linuxdo-authenticated:" + user.Username + ":" + user.AvatarURL,
+		Value:    "linuxdo-authenticated:" + user.Username,
 		MaxAge:   3600, // 使用秒数设置有效期（1小时）
 		HttpOnly: true,
 		Path:     "/",
