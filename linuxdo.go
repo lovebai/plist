@@ -17,12 +17,7 @@ const (
 	UserEndpoint          = "https://connect.linux.do/api/user"
 )
 
-var (
-	ClientID     = config.LinuxdoClientId
-	ClientSecret = config.LinuxdoClientSecret
-	RedirectURI  = config.Adderss + "/oauth2/callback"
-	store        = sessions.NewCookieStore([]byte("secret-key"))
-)
+var store = sessions.NewCookieStore([]byte("secret-key"))
 
 type User struct {
 	ID        int    `json:"id"`
@@ -53,12 +48,12 @@ func initiateAuthHandler(w http.ResponseWriter, r *http.Request) {
 	// 构造授权 URL
 	authURL := fmt.Sprintf("%s?client_id=%s&response_type=code&redirect_uri=%s&state=%s",
 		AuthorizationEndpoint,
-		ClientID,
-		RedirectURI,
+		config.ClientId,
+		config.Adderss+"/oauth2/callback",
 		state,
 	)
-
-	http.Redirect(w, r, authURL, http.StatusFound)
+	fmt.Printf("authURL: %v\n", authURL)
+	// http.Redirect(w, r, authURL, http.StatusFound)
 }
 
 // 处理回调
@@ -81,12 +76,12 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 请求 access token
 	resp, err := client.R().
-		SetBasicAuth(ClientID, ClientSecret).
+		SetBasicAuth(config.ClientId, config.ClientSecret).
 		SetHeader("Accept", "application/json").
 		SetFormData(map[string]string{
 			"grant_type":   "authorization_code",
 			"code":         code,
-			"redirect_uri": RedirectURI,
+			"redirect_uri": config.Adderss + "/oauth2/callback",
 		}).
 		Post(TokenEndpoint)
 
