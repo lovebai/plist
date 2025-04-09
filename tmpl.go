@@ -635,6 +635,7 @@ const loginTemplate = `<!DOCTYPE html>
             <div class="col-md-4">
                 <div class="card shadow">
                     <div class="card-body">
+                    {{if ne .Secure "false"}}
                         <h3 class="card-title mb-4">请输入访问密码</h3>
                         <form method="POST">
                             <div class="mb-3">
@@ -646,8 +647,9 @@ const loginTemplate = `<!DOCTYPE html>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">登录</button>
                         </form>
+                        {{end}}
                         {{if ne .Linuxdo "false"}}
-                        OR
+                        {{if ne .Secure "false"}}OR{{end}}
                         <a href="/oauth2/linxdo" class="btn btn-primary w-100" style="background-color: #4cad50;border: solid;">
                         <svg width="27" height="27" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
                             <clipPath id="a"><circle cx="60" cy="60" r="47"/></clipPath>
