@@ -43,12 +43,12 @@ func initEnv() {
 		defaultVal string
 	}{
 		"ImageDir":     {&config.ImageDir, "SITE_DIR", "./images"},
-		"Port":         {&config.Port, "SITE_PORT", "8009"},
+		"Port":         {&config.Port, "SITE_PORT", "8008"},
 		"Title":        {&config.Title, "SITE_TITLE", "在线图集"},
 		"Icon":         {&config.Icon, "SITE_ICON", "https://i.obai.cc/favicon.ico"},
 		"Dynamic":      {&config.Dynamic, "SITE_DYNAMIC", "false"},
 		"Linuxdo":      {&config.Linuxdo, "SITE_LINUXDO", "false"},
-		"Address":      {&config.Adderss, "SITE_Address", "http://localhost:8009"},
+		"Address":      {&config.Adderss, "SITE_Address", "http://localhost:8008"},
 		"ClientId":     {&config.ClientId, "SITE_CLIENT_ID", ""},
 		"ClientSecret": {&config.ClientSecret, "SITE_CLIENT_SECRET", ""},
 		"Secure":       {&config.Secure, "SITE_SECURE", "false"},
