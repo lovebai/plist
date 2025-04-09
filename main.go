@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -49,7 +50,9 @@ func scanCategories(imageDir string) []Category {
 }
 
 func main() {
-	initConfig()
+	initEnv()
+
+	fmt.Printf("State: %s,%s,%s\n", config.Adderss, config.ClientId, config.ClientSecret)
 
 	categoryCache = scanCategories(config.ImageDir)
 
