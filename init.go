@@ -8,7 +8,13 @@ import (
 )
 
 func init() {
-	configFileName := "config.yaml"
+	configFileName := "conf/config.yaml"
+	configDir := "conf"
+	if _, err := os.Stat(configDir); os.IsNotExist(err) {
+		if err := os.Mkdir(configDir, 0755); err != nil {
+			log.Fatalf("无法创建配置目录 %s: %v", configDir, err)
+		}
+	}
 	if _, err := os.Stat(configFileName); os.IsNotExist(err) {
 		defauleConfig := Config{
 			ImageDir:            "./images",
