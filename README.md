@@ -42,7 +42,7 @@
 1. docker 直接运行
 
 ```shell
-docker run -p 8008:8008 -v /images:/app/images --restart always -e SITE_TITLE=站点标题 -e SITE_DYNAMIC=true  kukudebai/plist:latest
+docker run -p 8008:8008 -v /images:/app/images -v ./conf:/conf --restart always kukudebai/plist:latest
 ```
 
 2. docker-compose
@@ -54,7 +54,7 @@ services:
         restart: always
         volumes:
             - './images:/app/images'
-            - './conf:/app/conf'
+            - './conf:/conf'
         ports:
             - '8008:8008'
 ```
