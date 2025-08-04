@@ -648,7 +648,7 @@ const loginTemplate = `<!DOCTYPE html>
                             <button type="submit" class="btn btn-primary w-100">登录</button>
                         </form>
                         {{end}}
-                        {{if ne .Linuxdo "false"}}
+                        {{if ne .LinuxdoEnable "false"}}
                         {{if ne .Secure "false"}}OR{{end}}
                         <a href="/oauth2/linxdo" class="btn btn-primary w-100" style="background-color: #4cad50;border: solid;">
                         <svg width="27" height="27" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">

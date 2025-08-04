@@ -21,7 +21,7 @@ func init() {
 			LinuxdoClientId:     "",
 			LinuxdoClientSecret: "",
 			Secure:              "false",
-			Password:            "",
+			Password:            "123456",
 		}
 		config = defauleConfig
 
