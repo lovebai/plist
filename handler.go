@@ -30,7 +30,7 @@ func loggingMiddleware(next http.Handler) http.Handler {
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "session-name")
 	var username, avatar string
-	if config.Linuxdo != "false" {
+	if config.LinuxdoEnable != "false" {
 		var ok bool
 		username, ok = session.Values["username"].(string)
 		if !ok {

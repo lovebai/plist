@@ -48,8 +48,8 @@ func initiateAuthHandler(w http.ResponseWriter, r *http.Request) {
 	// 构造授权 URL
 	authURL := fmt.Sprintf("%s?client_id=%s&response_type=code&redirect_uri=%s&state=%s",
 		AuthorizationEndpoint,
-		config.ClientId,
-		config.Adderss+"/oauth2/callback",
+		config.LinuxdoClientId,
+		config.WebAdderss+"/oauth2/callback",
 		state,
 	)
 	http.Redirect(w, r, authURL, http.StatusFound)
@@ -75,12 +75,12 @@ func callbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 请求 access token
 	resp, err := client.R().
-		SetBasicAuth(config.ClientId, config.ClientSecret).
+		SetBasicAuth(config.LinuxdoClientId, config.LinuxdoClientSecret).
 		SetHeader("Accept", "application/json").
 		SetFormData(map[string]string{
 			"grant_type":   "authorization_code",
 			"code":         code,
-			"redirect_uri": config.Adderss + "/oauth2/callback",
+			"redirect_uri": config.WebAdderss + "/oauth2/callback",
 		}).
 		Post(TokenEndpoint)
 

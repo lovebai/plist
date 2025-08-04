@@ -49,13 +49,13 @@ func scanCategories(imageDir string) []Category {
 }
 
 func main() {
-	initEnv()
+
 	categoryCache = scanCategories(config.ImageDir)
 
 	// 路由设置
 	http.HandleFunc("/login", loginHandler)
 
-	if config.Linuxdo != "false" {
+	if config.LinuxdoEnable != "false" {
 		http.HandleFunc("/oauth2/linxdo", initiateAuthHandler)
 		http.HandleFunc("/oauth2/callback", callbackHandler)
 	}
